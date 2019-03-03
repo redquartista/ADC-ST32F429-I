@@ -70,10 +70,10 @@ int main(void)
   {
 	  STM_EVAL_LEDOn(LED3);
 	  STM_EVAL_LEDOn(LED4);
-	  for(i=0; i<1000000; i++);
+	  for(i=0; i<2000000; i++);
 	  STM_EVAL_LEDOff(LED3);
 	  STM_EVAL_LEDOff(LED4);
-	  for(i=0; i<1000000; i++);
+	  for(i=0; i<2000000; i++);
 
   }
 }
