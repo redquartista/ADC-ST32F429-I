@@ -41,11 +41,20 @@ SOFTWARE.
 **
 **  Abstract: main program
 **
+**  Goal: Read the temperature from LM35 Temperature Sensor and display it on
+**  the in-built LTDC.
+**
+**	Author: redquartista
+**
+**	Organization: None
 **===========================================================================
 */
 int main(void)
 {
-  int i = 0;
+
+  /*Declaration of variables, initialization structures*/
+
+   int i = 0;
 
   /**
   *  IMPORTANT NOTE!
@@ -58,6 +67,44 @@ int main(void)
   */
 
   /* TODO - Add your application code here */
+
+  /*Initialize Clock to ADC, LTDC*/
+
+  /*ADC1 and LTDC, both the peripherals on ABP2. Hence we initialize the clock to these
+   *Peripherals with following functions: */
+
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_LTDC, ENABLE);
+
+
+  /* Initialize ADC*/
+
+  ADC_InitTypeDef ADC1_Init_Type;
+  ADC1_Init_Type.ADC_Resolution = ADC_Resolution_12b; //Set-up ADC in 12-bit resolution mode
+  ADC1_Init_Type.ADC_ScanConvMode = DISABLE; //Set-up ADC for single channel mode
+  ADC1_Init_Type.ADC_NbrOfConversion = 1; //Number of "Regular" conversions set at 1
+  ADC1_Init_Type.ADC_DataAlign = ADC_DataAlign_Right; //Conversion result will be stored in right-aligned mode
+  ADC1_Init_Type.ADC_ContinuousConvMode = ENABLE; //Conversion does not stop at EOC signal
+
+  ADC_CommonInitTypeDef ADC1_Common_Init_Type;
+  ADC_CommonStructInit(&ADC1_Common_Init_Type); /*Initialize ADC_Mode to Independent, ADC_Prescaler to 2,
+  ADC_DMAAccessMode to disabled, ADC_TwoSamplingDelay to 5  cycles*/
+
+  ADC_Init(ADC1, &ADC1_Init_Type);
+  ADC_CommonInit(&ADC1_Common_Init_Type);
+  ADC_RegularChannelConfig( ADC1, ADC_Channel_0, 1, ADC_SampleTime_3Cycles);
+
+  /*4-March, 12.34AM To-Do:
+  	  1. Check any other configuration is left
+  	  2. Check Vref settings
+  	  3. Continuous conversion mode to be se again by ADC_ContinuousModeCmd()?
+  	  4. What is ADC_SoftwareStartConv(),  ADC_GetSoftwareStartConvStatus() used for?
+  	  5. Enable EOC at every conversion? ADC_EOCOnEachRegularChannelCmd()
+  	  6. Misc
+  */
+
+
+  /* Initialize LTCD*/
 
   STM_EVAL_LEDInit(LED3);
   STM_EVAL_LEDInit(LED4);
