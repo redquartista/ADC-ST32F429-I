@@ -77,7 +77,7 @@ int main(void)
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_LTDC, ENABLE);
 
 
-  /* Initialize ADC*/
+  /*ADC Initialization*/
 
   ADC_InitTypeDef ADC1_Init_Type;
   ADC1_Init_Type.ADC_Resolution = ADC_Resolution_12b; //Set-up ADC in 12-bit resolution mode
@@ -87,20 +87,26 @@ int main(void)
   ADC1_Init_Type.ADC_ContinuousConvMode = ENABLE; //Conversion does not stop at EOC signal
 
   ADC_CommonInitTypeDef ADC1_Common_Init_Type;
-  ADC_CommonStructInit(&ADC1_Common_Init_Type); /*Initialize ADC_Mode to Independent, ADC_Prescaler to 2,
-  ADC_DMAAccessMode to disabled, ADC_TwoSamplingDelay to 5  cycles*/
+  ADC_CommonStructInit(&ADC1_Common_Init_Type); /*Initialize ADC1_Common_Init_Type.ADC_Mode to Independent,
+  ADC1_Common_Init_Type.ADC_Prescaler to 2, ADC1_Common_Init_Type.ADC_DMAAccessMode to disabled,
+  ADC1_Common_Init_Type.ADC_TwoSamplingDelay to 5  cycles*/
 
-  ADC_Init(ADC1, &ADC1_Init_Type);
+
   ADC_CommonInit(&ADC1_Common_Init_Type);
+  ADC_Init(ADC1, &ADC1_Init_Type);
   ADC_RegularChannelConfig( ADC1, ADC_Channel_0, 1, ADC_SampleTime_3Cycles);
+  ADC_Cmd (ADC1, ENABLE);
 
-  /*4-March, 12.34AM To-Do:
-  	  1. Check any other configuration is left
-  	  2. Check Vref settings
-  	  3. Continuous conversion mode to be se again by ADC_ContinuousModeCmd()?
-  	  4. What is ADC_SoftwareStartConv(),  ADC_GetSoftwareStartConvStatus() used for?
-  	  5. Enable EOC at every conversion? ADC_EOCOnEachRegularChannelCmd()
-  	  6. Misc
+  /*ADC Initialization*/
+
+
+  /*4-March, 12.34AM To-Do (Addressed on March 12 5.33 PM):
+  	  1. Check any other configuration is left (Addressed)
+  	  2. Check Vref settings (Addressed: No need)
+  	  3. Continuous conversion mode to be set again by ADC_ContinuousModeCmd()? (Addressed: No need)
+  	  4. What is ADC_SoftwareStartConv(),  ADC_GetSoftwareStartConvStatus() used for? (Addressed)
+  	  5. Enable EOC at every conversion? ADC_EOCOnEachRegularChannelCmd()(Addressed: No need)
+  	  6. Misc (Addressed)
   */
 
 
@@ -115,6 +121,7 @@ int main(void)
   /* Infinite loop */
   while (1)
   {
+	  ADC_SoftwareStartConv(ADC1); //Starts Conversion
 	  STM_EVAL_LEDOn(LED3);
 	  STM_EVAL_LEDOn(LED4);
 	  for(i=0; i<2000000; i++);
