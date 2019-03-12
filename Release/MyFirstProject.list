@@ -360,7 +360,7 @@ Disassembly of section .text:
  80004c4:	2001      	movs	r0, #1
  80004c6:	f7ff ff83 	bl	80003d0 <STM_EVAL_LEDOff>
  80004ca:	e7f0      	b.n	80004ae <main+0x1a>
- 80004cc:	000f4240 	.word	0x000f4240
+ 80004cc:	001e8480 	.word	0x001e8480
 
 080004d0 <sEE_TIMEOUT_UserCallback>:
  80004d0:	e7fe      	b.n	80004d0 <sEE_TIMEOUT_UserCallback>

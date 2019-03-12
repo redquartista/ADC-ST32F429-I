@@ -29,7 +29,10 @@ SOFTWARE.
 
 /* Includes */
 #include "stm32f4xx.h"
+#include "stm32f4xx_conf.h"
 #include "stm32f429i_discovery.h"
+#include <string.h>
+#include <stdio.h>
 
 /* Private macro */
 /* Private variables */
@@ -41,7 +44,7 @@ SOFTWARE.
 **
 **  Abstract: main program
 **
-**  Goal: Read the temperature from LM35 Temperature Sensor and display it on
+**  Goal: Read the temperature from LM35 Temperature Sensor and display it on USART and on
 **  the in-built LTDC.
 **
 **	Author: redquartista
@@ -49,15 +52,19 @@ SOFTWARE.
 **	Organization: None
 **===========================================================================
 */
+
+
 int main(void)
 {
 
   /*Declaration of variables, initialization structures*/
 
+   GPIO_InitTypeDef  GPIO_InitStructure;
+   USART_InitTypeDef USART_InitStruct;
    int i = 0;
 
   /**
-  *  IMPORTANT NOTE!
+  *  IMPORTANT NOTE!d
   *  The symbol VECT_TAB_SRAM needs to be defined when building the project
   *  if code has been located to RAM and interrupts are used. 
   *  Otherwise the interrupt table located in flash will be used.
@@ -66,9 +73,8 @@ int main(void)
   *  E.g.  SCB->VTOR = 0x20000000;  
   */
 
-  /* TODO - Add your application code here */
 
-  /*Initialize Clock to ADC, LTDC*/
+  /*Initialize Clock to ADC, LTDC, USART, GPIO*/
 
   /*ADC1 and LTDC, both the peripherals on ABP2. Hence we initialize the clock to these
    *Peripherals with following functions: */
@@ -76,6 +82,34 @@ int main(void)
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_LTDC, ENABLE);
 
+  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1,ENABLE);
+
+  /*Set PA9 and PA10 to alternate function of USART*/
+  GPIO_PinAFConfig(GPIOA, GPIO_PinSource9, GPIO_AF_USART1);
+  GPIO_PinAFConfig(GPIOA, GPIO_PinSource10, GPIO_AF_USART1);
+
+  /*GPIOA Initialization for PA9 and PA10*/
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_Init(GPIOA, &GPIO_InitStructure);
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
+  GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+
+  /*USART Initialization*/
+
+  USART_InitStruct.USART_BaudRate = 115200;
+  USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+  USART_InitStruct.USART_Mode = USART_Mode_Tx;
+  USART_InitStruct.USART_Parity = USART_Parity_No;
+  USART_InitStruct.USART_StopBits = USART_StopBits_1;
+  USART_InitStruct.USART_WordLength = USART_WordLength_8b;
+  USART_Init(USART1, &USART_InitStruct);
+  USART_Cmd	(USART1, ENABLE);
 
   /*ADC Initialization*/
 
@@ -95,7 +129,8 @@ int main(void)
   ADC_CommonInit(&ADC1_Common_Init_Type);
   ADC_Init(ADC1, &ADC1_Init_Type);
   ADC_RegularChannelConfig( ADC1, ADC_Channel_0, 1, ADC_SampleTime_3Cycles);
-  ADC_Cmd (ADC1, ENABLE);
+  //ADC_Cmd (ADC1, ENABLE);
+
 
   /*ADC Initialization*/
 
@@ -112,22 +147,30 @@ int main(void)
 
   /* Initialize LTCD*/
 
+
   STM_EVAL_LEDInit(LED3);
   STM_EVAL_LEDInit(LED4);
 
   STM_EVAL_LEDOn(LED3);
   STM_EVAL_LEDOn(LED4);
 
+  int count =0;
   /* Infinite loop */
   while (1)
   {
-	  ADC_SoftwareStartConv(ADC1); //Starts Conversion
-	  STM_EVAL_LEDOn(LED3);
-	  STM_EVAL_LEDOn(LED4);
-	  for(i=0; i<2000000; i++);
-	  STM_EVAL_LEDOff(LED3);
-	  STM_EVAL_LEDOff(LED4);
-	  for(i=0; i<2000000; i++);
+//	  ADC_SoftwareStartConv(ADC1); //Starts Conversion
+//	  printf("IT-TIM2 \r\n");
+//	  STM_EVAL_LEDOn(LED3);
+//	  STM_EVAL_LEDOn(LED4);
+//	  for(i=0; i<2000000; i++);
+//	  STM_EVAL_LEDOff(LED3);
+//	  STM_EVAL_LEDOff(LED4);
+//	  for(i=0; i<2000000; i++);
+
+
+	  printf("Count = %d \r\n", count++);
+	  STM_EVAL_LEDToggle(LED4);
+	  for(i=0;i<1000000;i++);
 
   }
 }
