@@ -59,7 +59,7 @@ int main(void)
 
   /*Declaration of variables, initialization structures*/
 
-   GPIO_InitTypeDef  GPIO_InitStructure;
+   GPIO_InitTypeDef  GPIO_InitStructure, GPIO_InitStructureAN;
    USART_InitTypeDef USART_InitStruct;
    int i = 0;
 
@@ -89,7 +89,7 @@ int main(void)
   GPIO_PinAFConfig(GPIOA, GPIO_PinSource9, GPIO_AF_USART1);
   GPIO_PinAFConfig(GPIOA, GPIO_PinSource10, GPIO_AF_USART1);
 
-  /*GPIOA Initialization for PA9 and PA10*/
+  /*GPIOA Initialization for PA1, PA9 and PA10*/
   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
   GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
@@ -98,6 +98,12 @@ int main(void)
   GPIO_Init(GPIOA, &GPIO_InitStructure);
   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
   GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+  /*Setting PA1 as Analog pin with no pull*/
+  GPIO_InitStructureAN.GPIO_Pin = GPIO_Pin_0;
+  GPIO_InitStructureAN.GPIO_Mode = GPIO_Mode_AN;
+  GPIO_InitStructureAN.GPIO_PuPd = GPIO_PuPd_NOPULL;
+  GPIO_Init(GPIOA, &GPIO_InitStructureAN);
 
 
   /*USART Initialization*/
@@ -119,17 +125,22 @@ int main(void)
   ADC1_Init_Type.ADC_NbrOfConversion = 1; //Number of "Regular" conversions set at 1
   ADC1_Init_Type.ADC_DataAlign = ADC_DataAlign_Right; //Conversion result will be stored in right-aligned mode
   ADC1_Init_Type.ADC_ContinuousConvMode = ENABLE; //Conversion does not stop at EOC signal
-
+  ADC1_Init_Type.ADC_ExternalTrigConv = ADC_ExternalTrigConv_T1_CC1;
+  ADC1_Init_Type.ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_None;
   ADC_CommonInitTypeDef ADC1_Common_Init_Type;
-  ADC_CommonStructInit(&ADC1_Common_Init_Type); /*Initialize ADC1_Common_Init_Type.ADC_Mode to Independent,
-  ADC1_Common_Init_Type.ADC_Prescaler to 2, ADC1_Common_Init_Type.ADC_DMAAccessMode to disabled,
-  ADC1_Common_Init_Type.ADC_TwoSamplingDelay to 5  cycles*/
+  ADC_CommonStructInit(&ADC1_Common_Init_Type);
+  /*Initialize ADC1_Common_Init_Type.ADC_Mode to Independent, ADC1_Common_Init_Type.ADC_Prescaler to 2,
+   ADC1_Common_Init_Type.ADC_DMAAccessMode to disabled, ADC1_Common_Init_Type.ADC_TwoSamplingDelay to 5  cycles*/
+
 
 
   ADC_CommonInit(&ADC1_Common_Init_Type);
   ADC_Init(ADC1, &ADC1_Init_Type);
-  ADC_RegularChannelConfig( ADC1, ADC_Channel_0, 1, ADC_SampleTime_3Cycles);
-  //ADC_Cmd (ADC1, ENABLE);
+  //ADC_ContinuousModeCmd (ADC1, ENABLE);
+  ADC_DiscModeCmd (ADC1, DISABLE);
+  //ADC_EOCOnEachRegularChannelCmd(ADC1,ENABLE);
+  ADC_RegularChannelConfig( ADC1, ADC_Channel_0, 1, ADC_SampleTime_15Cycles);
+  ADC_Cmd (ADC1, ENABLE);
 
 
   /*ADC Initialization*/
@@ -148,29 +159,32 @@ int main(void)
   /* Initialize LTCD*/
 
 
-  STM_EVAL_LEDInit(LED3);
+  //STM_EVAL_LEDInit(LED3);
   STM_EVAL_LEDInit(LED4);
 
-  STM_EVAL_LEDOn(LED3);
+  //STM_EVAL_LEDOn(LED3);
   STM_EVAL_LEDOn(LED4);
 
-  int count =0;
+  float tempff, tempDecimals;
+  //int count =0;
   /* Infinite loop */
+
   while (1)
   {
-//	  ADC_SoftwareStartConv(ADC1); //Starts Conversion
-//	  printf("IT-TIM2 \r\n");
-//	  STM_EVAL_LEDOn(LED3);
-//	  STM_EVAL_LEDOn(LED4);
-//	  for(i=0; i<2000000; i++);
-//	  STM_EVAL_LEDOff(LED3);
-//	  STM_EVAL_LEDOff(LED4);
-//	  for(i=0; i<2000000; i++);
-
-
-	  printf("Count = %d \r\n", count++);
+	  ADC_SoftwareStartConv(ADC1); //Starts Conversion
+//	  if(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC))
+//	  {
+		  //ADC_ClearFlag (ADC1, ADC_FLAG_EOC);
+//		  tempff = (float)ADC_GetConversionValue(ADC1);
+//		  tempff=(300*tempff/4096);
+//		  tempff=tempff+2;
+//		  tempDecimals = (tempff-(int)tempff)*100;
+		  //printf("Temp = %d.%d C \r\n", (int)tempff, (int)tempDecimals);
+	  printf("%d \r\n", (int)ADC_GetConversionValue(ADC1));
 	  STM_EVAL_LEDToggle(LED4);
 	  for(i=0;i<1000000;i++);
+//	  }
+
 
   }
 }
