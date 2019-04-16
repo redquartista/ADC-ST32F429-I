@@ -173,7 +173,7 @@ int main(void)
 
   /* Reload LTDC configuration  */
  LTDC_ReloadConfig(LTDC_IMReload);
- LTDC_LayerPosition(LTDC_Layer1, 0, (40));
+ LTDC_LayerPosition(LTDC_Layer1, 0, (40)); //Put Layer's start on 40th line from top
  /* Reload LTDC configuration  */
  LTDC_ReloadConfig(LTDC_IMReload);
 
@@ -367,7 +367,7 @@ static void LCD_Config(void)
 	  LTDC_Layer_InitStruct.LTDC_CFBPitch = (240 * 2);
 
 	  /* configure the number of lines */
-	  LTDC_Layer_InitStruct.LTDC_CFBLineNumber = 240;
+	  LTDC_Layer_InitStruct.LTDC_CFBLineNumber = 240; //Number of vertical lines
 
 	  LTDC_LayerInit(LTDC_Layer1, &LTDC_Layer_InitStruct);
 
