@@ -31,11 +31,13 @@ SOFTWARE.
 #include "stm32f4xx.h"
 #include "stm32f4xx_conf.h"
 #include "stm32f429i_discovery.h"
+#include "stm32f4xx_gpio.h"
 #include <string.h>
 #include <stdio.h>
 #include "stm32f429i_discovery_lcd.h"
 #include "st_logo1.h"
 #include "my.h"
+#include "delay.h"
 /* Private macro */
 /* Private variables */
 /* Private function prototypes */
@@ -44,6 +46,7 @@ static void LCD_Config(void);
 static void LCD_AF_GPIOConfig(void);
 static void delay(__IO uint32_t nCount);
 
+#define uS_Delay 1000
 /**
 **===========================================================================
 **
@@ -58,9 +61,16 @@ static void delay(__IO uint32_t nCount);
 **===========================================================================
 */
 
+void DHTInit();
+void DHTReady();
+void DHTRead();
+
 
 int main(void)
 {
+
+  /*Initialize Systick Timer to Count in Microseconds*/
+	sysTickIntConfig();
 
   /*Declaration of variables, initialization structures*/
 
@@ -87,7 +97,9 @@ int main(void)
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_LTDC, ENABLE);
 
+
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1,ENABLE);
 
   /*Set PA9 and PA10 to alternate function of USART*/
@@ -104,11 +116,23 @@ int main(void)
   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
   GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-  /*Setting PA1 as Analog pin with no pull*/
+  /*Setting PD0 as Analog pin with no pull*/
   GPIO_InitStructureAN.GPIO_Pin = GPIO_Pin_0;
   GPIO_InitStructureAN.GPIO_Mode = GPIO_Mode_AN;
   GPIO_InitStructureAN.GPIO_PuPd = GPIO_PuPd_NOPULL;
   GPIO_Init(GPIOA, &GPIO_InitStructureAN);
+
+  /*PA7 as Data Line*/
+  GPIO_InitTypeDef GPIO_InitStructure2;
+  GPIO_InitStructure2.GPIO_Pin = GPIO_Pin_7;
+  GPIO_InitStructure2.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure2.GPIO_Mode = GPIO_Mode_OUT;
+  GPIO_InitStructure2.GPIO_OType = GPIO_OType_PP;
+  GPIO_InitStructure2.GPIO_PuPd = GPIO_PuPd_NOPULL;
+  GPIO_Init(GPIOA, &GPIO_InitStructure2);
+
+  GPIO_SetBits(GPIOA, GPIO_Pin_7);
+
 
 
   /*USART Initialization*/
@@ -188,22 +212,28 @@ int main(void)
   STM_EVAL_LEDInit(LED4);
 
   //STM_EVAL_LEDOn(LED3);
-  STM_EVAL_LEDOn(LED4);
+  STM_EVAL_LEDOff(LED4);
 
   float tempff, tempDecimals;
   //int count =0;
   /* Infinite loop */
  // LCD_SetColors (0x0000, 0x4db4);
-  delay(1000);
+  //delay(1000);
 
   int lineA = 0;
   while (1)
   {
 
 	  STM_EVAL_LEDToggle(LED4);
-	  delay(100);
+	//  GPIO_WriteBit(GPIOA, GPIO_Pin_2, Bit_RESET);
+	  GPIO_SetBits(GPIOA, GPIO_Pin_7);
 
-	  for(lineA = 40; lineA <281; lineA++ )
+	  delay_ms(1);
+	  //GPIO_WriteBit(GPIOA, GPIO_Pin_2, Bit_SET);
+	  STM_EVAL_LEDToggle(LED4);
+	  GPIO_ResetBits(GPIOA,	GPIO_Pin_7);
+	  delay_ms(1000);
+	  /*for(lineA = 40; lineA <281; lineA++ )
 	  {
 		  LCD_ClearLine	(lineA);
 		  delay(100);
@@ -211,7 +241,7 @@ int main(void)
 		  delay(100);
 
 
-	  }
+	  }*/
 	  /* move the picture */
 
 
@@ -490,4 +520,21 @@ uint32_t sEE_TIMEOUT_UserCallback(void)
   while (1)
   {
   }
+}
+
+void DHTInit()
+{
+	  /*PA7 as Data Line*/
+	  GPIO_InitTypeDef GPIO_InitStructure2;
+	  GPIO_InitStructure2.GPIO_Pin = GPIO_Pin_7;
+	  GPIO_InitStructure2.GPIO_Speed = GPIO_Speed_50MHz;
+	  GPIO_InitStructure2.GPIO_Mode = GPIO_Mode_OUT;
+	  GPIO_InitStructure2.GPIO_OType = GPIO_OType_PP;
+	  GPIO_InitStructure2.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	  GPIO_Init(GPIOA, &GPIO_InitStructure2);
+
+	  GPIO_SetBits(GPIOA, GPIO_Pin_7);
+
+
+
 }

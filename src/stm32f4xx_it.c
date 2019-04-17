@@ -50,6 +50,8 @@
   * @param  None
   * @retval None
   */
+
+
 void NMI_Handler(void)
 {
 }
@@ -138,10 +140,12 @@ void PendSV_Handler(void)
   * @param  None
   * @retval None
   */
-void SysTick_Handler(void)
-{
-/*  TimingDelay_Decrement(); */
-}
+//void SysTick_Handler(void)
+//{
+///*  TimingDelay_Decrement(); */
+//	Micros++;
+//	Millis %= Micros;
+//}
 
 /******************************************************************************/
 /*                 STM32F4xx Peripherals Interrupt Handlers                   */
